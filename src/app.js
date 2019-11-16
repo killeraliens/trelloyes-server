@@ -42,6 +42,8 @@ app.get('/card/:id', getCard)
 app.get('/list/:id', getList)
 app.post('/card', validateContentType, postCard)  //for correct error reporting
 app.post('/list', validateContentType, postList)
+app.delete('/list/:id', deleteList)
+app.delete('/card/:id', deleteCard)
 app.use(errorHandler)
 
 function getLists(req, res) {
@@ -108,8 +110,6 @@ function postList(req, res) {
     }
   })
 
-
-
   if (!header) {
     logger.error('Header required')
     return res.status(400).send('Invalid Data')
@@ -128,7 +128,6 @@ function postList(req, res) {
   }
 
   if(!cardsAreValid) {
-
     return res
       .status(400)
       .send('Invalid Data')
@@ -138,11 +137,57 @@ function postList(req, res) {
   const list = { ...req.body, id }
   LISTS.push(list)
 
+  logger.info(`List with id ${id} created`)
+
   res
     .status(201)
     .location(`/list/${id}`)
     .json(list)
 }
+
+
+function deleteList(req, res) {
+  const { id } = req.params
+
+  const listI = LISTS.findIndex(list => list.id == id)
+
+  if (listI === -1) {
+    logger.error(`Cannot delete list with id ${id}, not found`)
+    return res.status(404).send('Not found')
+  }
+
+  LISTS.splice(listI, 1)
+
+  logger.info(`List with ${id} deleted`)
+  res
+    .status(204)
+    .end()
+}
+
+
+function deleteCard(req, res) {
+  const { id } = req.params
+
+  const cardI = CARDS.findIndex(card => card.id == id)
+
+  if (cardI === -1) {
+    logger.error(`Card with id ${id} cannot be deleted, not found`)
+    return res.status(404).send('Not found')
+  }
+
+  CARDS.splice(cardI, 1)
+  LISTS.forEach(list => {
+     const cI = list.cardIds.findIndex(el => el == id)
+     if (cI !== -1) {
+       list.cardIds.splice(cI, 1)
+     }
+  })
+
+  res
+    .status(204)
+    .end()
+}
+
 
 function validateBearerToken(req, res, next) {
   const apiToken = process.env.API_TOKEN
