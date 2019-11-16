@@ -60,11 +60,11 @@ describe('POST /list endpoint', () => {
       .expect(400, 'Invalid Data')
   })
 
-  it('returns 400 response if receiving unexpected req.body keys', (done) => {
+  it('returns 400 response if receiving unexpected req.body keys', () => {
     return supertest(app)
       .post('/list')
       .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
       .send(incorrectKeysList)
-      .expect(400, 'Invalid Data', done())
+      .expect(400, 'Invalid Data')
   })
 })

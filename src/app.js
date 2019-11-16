@@ -100,8 +100,8 @@ function postCard(req, res) {
 
 function postList(req, res) {
   const { header, cardIds = []} = req.body
-  Object.keys(req.body).forEach(key => {
 
+  Object.keys(req.body).forEach(key => {
     if (!["id", "header", "cardIds"].includes(key)) {
       logger.error(`Bad keys in ${JSON.stringify(req.body)}`)
       return res.status(400).send('Invalid Data')
